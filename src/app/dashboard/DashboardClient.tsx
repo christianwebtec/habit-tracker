@@ -59,7 +59,7 @@ export default function DashboardClient({
         setStats(newStats);
     }, [logs, user.id, profile]);
 
-    const handleLogUpdate = async (workedOut: boolean, drankAlcohol: boolean) => {
+    const handleLogUpdate = async (workedOut: boolean, drankAlcohol: boolean, smokedWeed: boolean) => {
         const today = new Date().toISOString().split('T')[0];
 
         const { data, error } = await supabase
@@ -69,6 +69,7 @@ export default function DashboardClient({
                 date: today,
                 worked_out: workedOut,
                 drank_alcohol: drankAlcohol,
+                smoked_weed: smokedWeed,
                 updated_at: new Date().toISOString(),
             }, {
                 onConflict: 'user_id,date'
@@ -141,6 +142,7 @@ export default function DashboardClient({
                 <DailyCheckIn
                     initialWorkedOut={todayLog?.worked_out || false}
                     initialDrankAlcohol={todayLog?.drank_alcohol || false}
+                    initialSmokedWeed={todayLog?.smoked_weed || false}
                     onUpdate={handleLogUpdate}
                 />
 

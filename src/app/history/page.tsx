@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import { createClient } from '@/lib/supabase/client';
 import { DailyLog } from '@/lib/types';
 import { motion } from 'framer-motion';
-import { Calendar, Dumbbell, Beer, ArrowLeft, Save } from 'lucide-react';
+import { Calendar, Dumbbell, Beer, Leaf, ArrowLeft, Save } from 'lucide-react';
 import { format, subDays, startOfMonth, endOfMonth, eachDayOfInterval } from 'date-fns';
 
 export default function HistoryPage() {
@@ -13,7 +13,7 @@ export default function HistoryPage() {
     const supabase = createClient();
     const [logs, setLogs] = useState<DailyLog[]>([]);
     const [selectedDate, setSelectedDate] = useState<string | null>(null);
-    const [editLog, setEditLog] = useState<{ worked_out: boolean; drank_alcohol: boolean } | null>(null);
+    const [editLog, setEditLog] = useState<{ worked_out: boolean; drank_alcohol: boolean; smoked_weed: boolean } | null>(null);
     const [loading, setLoading] = useState(true);
     const [saving, setSaving] = useState(false);
 
@@ -49,6 +49,7 @@ export default function HistoryPage() {
         setEditLog({
             worked_out: log?.worked_out || false,
             drank_alcohol: log?.drank_alcohol || false,
+            smoked_weed: log?.smoked_weed || false,
         });
     };
 
@@ -66,6 +67,7 @@ export default function HistoryPage() {
                 date: selectedDate,
                 worked_out: editLog.worked_out,
                 drank_alcohol: editLog.drank_alcohol,
+                smoked_weed: editLog.smoked_weed,
                 updated_at: new Date().toISOString(),
             }, {
                 onConflict: 'user_id,date'
@@ -92,7 +94,7 @@ export default function HistoryPage() {
         return logs.find(log => log.date === dateStr);
     };
 
-    const netPoints = editLog ? (editLog.worked_out ? 1 : 0) + (editLog.drank_alcohol ? -1 : 0) : 0;
+    const netPoints = editLog ? (editLog.worked_out ? 1 : 0) + (editLog.drank_alcohol ? -1 : 0) + (editLog.smoked_weed ? -1 : 0) : 0;
 
     return (
         <div className="min-h-screen p-4 md:p-8">
@@ -147,15 +149,20 @@ export default function HistoryPage() {
                                         <div className="text-lg font-bold">
                                             {format(date, 'EEE')}
                                         </div>
-                                        <div className="flex gap-2 mt-2">
+                                        <div className="flex gap-1 mt-2 flex-wrap">
                                             {log?.worked_out && (
-                                                <div className="w-6 h-6 bg-green-500/20 rounded flex items-center justify-center">
-                                                    <Dumbbell className="w-4 h-4 text-green-400" />
+                                                <div className="w-5 h-5 bg-green-500/20 rounded flex items-center justify-center" title="Worked Out">
+                                                    <Dumbbell className="w-3 h-3 text-green-400" />
                                                 </div>
                                             )}
                                             {log?.drank_alcohol && (
-                                                <div className="w-6 h-6 bg-red-500/20 rounded flex items-center justify-center">
-                                                    <Beer className="w-4 h-4 text-red-400" />
+                                                <div className="w-5 h-5 bg-red-500/20 rounded flex items-center justify-center" title="Drank Alcohol">
+                                                    <Beer className="w-3 h-3 text-red-400" />
+                                                </div>
+                                            )}
+                                            {log?.smoked_weed && (
+                                                <div className="w-5 h-5 bg-yellow-500/20 rounded flex items-center justify-center" title="Smoked Weed">
+                                                    <Leaf className="w-3 h-3 text-yellow-500" />
                                                 </div>
                                             )}
                                         </div>
@@ -184,23 +191,23 @@ export default function HistoryPage() {
                             Edit {format(new Date(selectedDate), 'MMMM d, yyyy')}
                         </h3>
 
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
                             {/* Workout Toggle */}
                             <button
                                 onClick={() => setEditLog({ ...editLog, worked_out: !editLog.worked_out })}
                                 className={`
-                                    rounded-xl p-6 transition-all
+                                    rounded-xl p-4 transition-all
                                     ${editLog.worked_out
                                         ? 'bg-gradient-to-br from-green-500 to-emerald-600'
                                         : 'glass hover:glass-strong'
                                     }
                                 `}
                             >
-                                <div className="flex items-center gap-3">
+                                <div className="flex flex-col items-center gap-2 text-center">
                                     <Dumbbell className="w-6 h-6" />
-                                    <div className="text-left">
+                                    <div>
                                         <div className="font-semibold">Worked Out</div>
-                                        <div className="text-sm opacity-90">+1 point</div>
+                                        <div className="text-xs opacity-90">+1 point</div>
                                     </div>
                                 </div>
                             </button>
@@ -209,18 +216,38 @@ export default function HistoryPage() {
                             <button
                                 onClick={() => setEditLog({ ...editLog, drank_alcohol: !editLog.drank_alcohol })}
                                 className={`
-                                    rounded-xl p-6 transition-all
+                                    rounded-xl p-4 transition-all
                                     ${editLog.drank_alcohol
                                         ? 'bg-gradient-to-br from-red-500 to-rose-600'
                                         : 'glass hover:glass-strong'
                                     }
                                 `}
                             >
-                                <div className="flex items-center gap-3">
+                                <div className="flex flex-col items-center gap-2 text-center">
                                     <Beer className="w-6 h-6" />
-                                    <div className="text-left">
-                                        <div className="font-semibold">Drank Alcohol</div>
-                                        <div className="text-sm opacity-90">-1 point</div>
+                                    <div>
+                                        <div className="font-semibold">Alcohol</div>
+                                        <div className="text-xs opacity-90">-1 point</div>
+                                    </div>
+                                </div>
+                            </button>
+
+                            {/* Weed Toggle */}
+                            <button
+                                onClick={() => setEditLog({ ...editLog, smoked_weed: !editLog.smoked_weed })}
+                                className={`
+                                    rounded-xl p-4 transition-all
+                                    ${editLog.smoked_weed
+                                        ? 'bg-gradient-to-br from-yellow-500 to-orange-600'
+                                        : 'glass hover:glass-strong'
+                                    }
+                                `}
+                            >
+                                <div className="flex flex-col items-center gap-2 text-center">
+                                    <Leaf className="w-6 h-6" />
+                                    <div>
+                                        <div className="font-semibold">Weed</div>
+                                        <div className="text-xs opacity-90">-1 point</div>
                                     </div>
                                 </div>
                             </button>

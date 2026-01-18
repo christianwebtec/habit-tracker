@@ -36,15 +36,7 @@ export default function AuthForm() {
                 if (signUpError) throw signUpError;
 
                 if (data.user) {
-                    // Create user profile
-                    const { error: profileError } = await supabase
-                        .from('users')
-                        .insert({
-                            id: data.user.id,
-                            username: username || email.split('@')[0],
-                        });
-
-                    if (profileError) throw profileError;
+                    // Profile is created automatically by DB trigger
                 }
             } else {
                 // Sign in

@@ -162,6 +162,16 @@ export default function AuthForm() {
                                     className="w-full pl-10 pr-4 py-3 bg-input border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary transition-all"
                                 />
                             </div>
+                            {!isSignUp && (
+                                <div className="mt-2 text-right">
+                                    <a
+                                        href="/forgot-password"
+                                        className="text-sm text-primary hover:underline"
+                                    >
+                                        Forgot password?
+                                    </a>
+                                </div>
+                            )}
                         </div>
 
                         {error && (

@@ -81,7 +81,7 @@ export default function HistoryPage() {
 
     const getLast30Days = () => {
         const days = [];
-        for (let i = 0; i < 30; i++) {
+        for (let i = 29; i >= 0; i--) {
             days.push(subDays(new Date(), i));
         }
         return days;
@@ -161,7 +161,7 @@ export default function HistoryPage() {
                                         </div>
                                         {log && (
                                             <div className={`text-sm font-semibold mt-2 ${log.net_points > 0 ? 'text-green-400' :
-                                                    log.net_points < 0 ? 'text-red-400' : 'text-gray-400'
+                                                log.net_points < 0 ? 'text-red-400' : 'text-gray-400'
                                                 }`}>
                                                 {log.net_points > 0 ? '+' : ''}{log.net_points}
                                             </div>
@@ -230,7 +230,7 @@ export default function HistoryPage() {
                         <div className="glass rounded-xl p-4 mb-4 text-center">
                             <div className="text-sm text-muted-foreground mb-1">Net Score</div>
                             <div className={`text-3xl font-bold ${netPoints > 0 ? 'text-green-400' :
-                                    netPoints < 0 ? 'text-red-400' : 'text-gray-400'
+                                netPoints < 0 ? 'text-red-400' : 'text-gray-400'
                                 }`}>
                                 {netPoints > 0 ? '+' : ''}{netPoints}
                             </div>

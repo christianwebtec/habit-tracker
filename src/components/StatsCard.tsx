@@ -44,7 +44,8 @@ export default function StatsCard({
         >
             <div className="flex items-start justify-between mb-4">
                 <div>
-                    <p className="text-sm text-muted-foreground mb-1">{title}</p>
+                    <p className={`text-sm mb-1 ${variant === 'default' ? 'text-muted-foreground' : 'text-white/90'
+                        }`}>{title}</p>
                     <p className={`
             text-4xl font-bold
             ${variant === 'default' ? trendColors[trend] : 'text-white'}
@@ -62,7 +63,8 @@ export default function StatsCard({
                 )}
             </div>
             {subtitle && (
-                <p className="text-sm opacity-80">{subtitle}</p>
+                <p className={`text-sm ${variant === 'default' ? 'opacity-80' : 'text-white/70'
+                    }`}>{subtitle}</p>
             )}
         </motion.div>
     );

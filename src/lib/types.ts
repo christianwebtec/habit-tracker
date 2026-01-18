@@ -11,6 +11,7 @@ export interface DailyLog {
   date: string;
   worked_out: boolean;
   drank_alcohol: boolean;
+  smoked_weed: boolean;
   net_points: number;
   created_at: string;
   updated_at: string;

@@ -81,7 +81,7 @@ export default function HistoryPage() {
 
     const getLast30Days = () => {
         const days = [];
-        for (let i = 29; i >= 0; i--) {
+        for (let i = 0; i < 30; i++) {
             days.push(subDays(new Date(), i));
         }
         return days;

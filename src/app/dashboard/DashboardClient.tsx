@@ -118,13 +118,23 @@ export default function DashboardClient({
                         </h1>
                         <p className="text-muted-foreground">Keep the momentum going!</p>
                     </div>
-                    <button
-                        onClick={handleSignOut}
-                        className="glass-strong p-3 rounded-lg hover-lift transition-smooth"
-                        title="Sign out"
-                    >
-                        <LogOut className="w-5 h-5" />
-                    </button>
+                    <div className="flex gap-2">
+                        <button
+                            onClick={() => router.push('/history')}
+                            className="glass-strong px-4 py-3 rounded-lg hover-lift transition-smooth flex items-center gap-2"
+                            title="View history"
+                        >
+                            <Calendar className="w-5 h-5" />
+                            <span className="hidden sm:inline">History</span>
+                        </button>
+                        <button
+                            onClick={handleSignOut}
+                            className="glass-strong p-3 rounded-lg hover-lift transition-smooth"
+                            title="Sign out"
+                        >
+                            <LogOut className="w-5 h-5" />
+                        </button>
+                    </div>
                 </div>
 
                 {/* Daily Check-In */}

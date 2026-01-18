@@ -1,26 +1,169 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+
 @import "tailwindcss";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
+@theme {
+  /* Colors */
+  --color-background: oklch(0.15 0 0);
+  --color-foreground: oklch(0.98 0 0);
+
+  --color-card: oklch(0.18 0 0);
+  --color-card-foreground: oklch(0.98 0 0);
+
+  --color-primary: oklch(0.55 0.20 150);
+  --color-primary-foreground: oklch(1 0 0);
+
+  --color-secondary: oklch(0.65 0.25 250);
+  --color-secondary-foreground: oklch(1 0 0);
+
+  --color-accent: oklch(0.75 0.25 320);
+  --color-accent-foreground: oklch(1 0 0);
+
+  --color-destructive: oklch(0.65 0.25 25);
+  --color-destructive-foreground: oklch(1 0 0);
+
+  --color-muted: oklch(0.25 0 0);
+  --color-muted-foreground: oklch(0.60 0 0);
+
+  --color-border: oklch(0.30 0 0);
+  --color-input: oklch(0.30 0 0);
+  --color-ring: oklch(0.55 0.20 150);
+
+  --radius: 0.75rem;
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+* {
+  border-color: var(--color-border);
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background-color: var(--color-background);
+  color: var(--color-foreground);
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+/* Glassmorphism utilities */
+@utility glass {
+  background: rgba(255, 255, 255, 0.05);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+@utility glass-strong {
+  background: rgba(255, 255, 255, 0.08);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+}
+
+/* Gradient backgrounds */
+@utility gradient-primary {
+  background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-secondary) 100%);
+}
+
+@utility gradient-accent {
+  background: linear-gradient(135deg, var(--color-accent) 0%, var(--color-secondary) 100%);
+}
+
+/* Smooth transitions */
+@utility transition-smooth {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Hover lift effect */
+@utility hover-lift {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+
+  &:hover {
+    transform: translateY(-2px);
+  }
+
+  &:active {
+    transform: translateY(0);
+  }
+}
+
+/* Glow effects */
+@utility glow-primary {
+  box-shadow: 0 0 20px color-mix(in oklch, var(--color-primary), transparent 70%);
+}
+
+@utility glow-accent {
+  box-shadow: 0 0 20px color-mix(in oklch, var(--color-accent), transparent 70%);
+}
+
+/* Text gradients */
+@utility text-gradient-primary {
+  background-clip: text;
+  -webkit-background-clip: text;
+  color: transparent;
+  background-image: linear-gradient(135deg, var(--color-primary) 0%, var(--color-secondary) 100%);
+}
+
+@utility text-gradient-accent {
+  background-clip: text;
+  -webkit-background-clip: text;
+  color: transparent;
+  background-image: linear-gradient(135deg, var(--color-accent) 0%, var(--color-secondary) 100%);
+}
+
+/* Custom scrollbar */
+.custom-scrollbar::-webkit-scrollbar {
+  width: 8px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: var(--color-muted);
+  border-radius: 4px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: var(--color-primary);
+  border-radius: 4px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: var(--color-secondary);
+}
+
+/* Animations */
+@keyframes pulse-glow {
+
+  0%,
+  100% {
+    opacity: 1;
+    box-shadow: 0 0 20px color-mix(in oklch, var(--color-primary), transparent 70%);
+  }
+
+  50% {
+    opacity: 0.8;
+    box-shadow: 0 0 40px color-mix(in oklch, var(--color-primary), transparent 50%);
+  }
+}
+
+@utility animate-pulse-glow {
+  animation: pulse-glow 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+@keyframes slide-in-bottom {
+  from {
+    transform: translateY(20px);
+    opacity: 0;
+  }
+
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+@utility animate-slide-in {
+  animation: slide-in-bottom 0.4s ease-out;
 }

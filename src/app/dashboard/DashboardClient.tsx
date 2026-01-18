@@ -61,7 +61,6 @@ export default function DashboardClient({
 
     const handleLogUpdate = async (workedOut: boolean, drankAlcohol: boolean) => {
         const today = new Date().toISOString().split('T')[0];
-        const netPoints = (workedOut ? 1 : 0) + (drankAlcohol ? -1 : 0);
 
         const { data, error } = await supabase
             .from('daily_logs')
@@ -70,7 +69,6 @@ export default function DashboardClient({
                 date: today,
                 worked_out: workedOut,
                 drank_alcohol: drankAlcohol,
-                net_points: netPoints,
                 updated_at: new Date().toISOString(),
             }, {
                 onConflict: 'user_id,date'
@@ -78,7 +76,16 @@ export default function DashboardClient({
             .select()
             .single();
 
-        if (error) throw error;
+        if (error) {
+            console.error('Supabase error details:', {
+                message: error.message,
+                details: error.details,
+                hint: error.hint,
+                code: error.code,
+                fullError: error
+            });
+            throw error;
+        }
 
         // Update local state
         setLogs(prevLogs => {

@@ -137,7 +137,7 @@ export default function HistoryPage() {
                                         className={`
                                             glass rounded-xl p-4 text-left transition-all
                                             ${isSelected ? 'ring-2 ring-primary' : ''}
-                                            ${isToday ? 'border-2 border-accent' : ''}
+                                            ${isToday ? 'border-2 border-green-500 shadow-lg shadow-green-500/30' : ''}
                                             hover-lift
                                         `}
                                     >

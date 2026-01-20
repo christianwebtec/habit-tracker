@@ -21,6 +21,7 @@ import Link from 'next/link';
 export default function DemoPage() {
     const [workedOut, setWorkedOut] = useState(true);
     const [drankAlcohol, setDrankAlcohol] = useState(false);
+    const [smokedWeed, setSmokedWeed] = useState(false);
     const [timeframe, setTimeframe] = useState<TimeFrame>('weekly');
 
     // Mock data
@@ -79,9 +80,10 @@ export default function DemoPage() {
         { id: '2', name: 'Weekend Warriors', invite_code: 'XYZ789' },
     ];
 
-    const handleUpdate = async (worked: boolean, drank: boolean) => {
+    const handleUpdate = async (worked: boolean, drank: boolean, weed: boolean) => {
         setWorkedOut(worked);
         setDrankAlcohol(drank);
+        setSmokedWeed(weed);
         // Simulate async operation
         await new Promise(resolve => setTimeout(resolve, 500));
     };
@@ -133,6 +135,7 @@ export default function DemoPage() {
                 <DailyCheckIn
                     initialWorkedOut={workedOut}
                     initialDrankAlcohol={drankAlcohol}
+                    initialSmokedWeed={smokedWeed}
                     onUpdate={handleUpdate}
                 />
 

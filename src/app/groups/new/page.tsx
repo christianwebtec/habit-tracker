@@ -36,6 +36,22 @@ export default function NewGroupPage() {
             const { data: { user } } = await supabase.auth.getUser();
             if (!user) throw new Error('Not authenticated');
 
+            // Check if user profile exists
+            const { data: profile, error: profileError } = await supabase
+                .from('users')
+                .select('id')
+                .eq('id', user.id)
+                .maybeSingle();
+
+            if (profileError) {
+                console.error('Profile check error:', profileError);
+                throw new Error('Failed to verify user profile');
+            }
+
+            if (!profile) {
+                throw new Error('User profile not found. Please refresh the page and try again.');
+            }
+
             const code = generateInviteCode();
 
             const { data, error: createError } = await supabase
@@ -48,10 +64,27 @@ export default function NewGroupPage() {
                 .select()
                 .single();
 
-            if (createError) throw createError;
+            if (createError) {
+                console.error('Group creation error:', createError);
+                throw createError;
+            }
+
+            // Auto-join the group as creator
+            const { error: joinError } = await supabase
+                .from('group_memberships')
+                .insert({
+                    group_id: data.id,
+                    user_id: user.id,
+                });
+
+            if (joinError) {
+                console.error('Auto-join error:', joinError);
+                // Don't fail if auto-join fails, user can join manually
+            }
 
             setCreatedCode(code);
         } catch (err: any) {
+            console.error('Create group error:', err);
             setError(err.message || 'Failed to create group');
         } finally {
             setLoading(false);
@@ -67,6 +100,22 @@ export default function NewGroupPage() {
             const { data: { user } } = await supabase.auth.getUser();
             if (!user) throw new Error('Not authenticated');
 
+            // Check if user profile exists
+            const { data: profile, error: profileError } = await supabase
+                .from('users')
+                .select('id')
+                .eq('id', user.id)
+                .maybeSingle();
+
+            if (profileError) {
+                console.error('Profile check error:', profileError);
+                throw new Error('Failed to verify user profile');
+            }
+
+            if (!profile) {
+                throw new Error('User profile not found. Please refresh the page and try again.');
+            }
+
             // Find group by invite code
             const { data: group, error: findError } = await supabase
                 .from('groups')
@@ -75,6 +124,7 @@ export default function NewGroupPage() {
                 .single();
 
             if (findError || !group) {
+                console.error('Group find error:', findError);
                 throw new Error('Invalid invite code');
             }
 
@@ -87,6 +137,7 @@ export default function NewGroupPage() {
                 });
 
             if (joinError) {
+                console.error('Join error:', joinError);
                 if (joinError.code === '23505') {
                     throw new Error('You are already a member of this group');
                 }
@@ -95,6 +146,7 @@ export default function NewGroupPage() {
 
             router.push(`/groups/${group.id}`);
         } catch (err: any) {
+            console.error('Join group error:', err);
             setError(err.message || 'Failed to join group');
         } finally {
             setLoading(false);

@@ -22,6 +22,7 @@ export default function DemoPage() {
     const [workedOut, setWorkedOut] = useState(true);
     const [drankAlcohol, setDrankAlcohol] = useState(false);
     const [smokedWeed, setSmokedWeed] = useState(false);
+    const [ateJunkFood, setAteJunkFood] = useState(false);
     const [timeframe, setTimeframe] = useState<TimeFrame>('weekly');
 
     // Mock data
@@ -80,10 +81,11 @@ export default function DemoPage() {
         { id: '2', name: 'Weekend Warriors', invite_code: 'XYZ789' },
     ];
 
-    const handleUpdate = async (worked: boolean, drank: boolean, weed: boolean) => {
+    const handleUpdate = async (worked: boolean, drank: boolean, weed: boolean, junk: boolean) => {
         setWorkedOut(worked);
         setDrankAlcohol(drank);
         setSmokedWeed(weed);
+        setAteJunkFood(junk);
         // Simulate async operation
         await new Promise(resolve => setTimeout(resolve, 500));
     };
@@ -136,6 +138,7 @@ export default function DemoPage() {
                     initialWorkedOut={workedOut}
                     initialDrankAlcohol={drankAlcohol}
                     initialSmokedWeed={smokedWeed}
+                    initialAteJunkFood={ateJunkFood}
                     onUpdate={handleUpdate}
                 />
 

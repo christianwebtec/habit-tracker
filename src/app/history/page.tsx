@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import { createClient } from '@/lib/supabase/client';
 import { DailyLog } from '@/lib/types';
 import { motion } from 'framer-motion';
-import { Calendar, Dumbbell, Beer, Leaf, ArrowLeft, Save } from 'lucide-react';
+import { Calendar, Dumbbell, Beer, Leaf, Cookie, ArrowLeft, Save } from 'lucide-react';
 import { format, subDays, startOfMonth, endOfMonth, eachDayOfInterval } from 'date-fns';
 
 export default function HistoryPage() {
@@ -13,7 +13,7 @@ export default function HistoryPage() {
     const supabase = createClient();
     const [logs, setLogs] = useState<DailyLog[]>([]);
     const [selectedDate, setSelectedDate] = useState<string | null>(null);
-    const [editLog, setEditLog] = useState<{ worked_out: boolean; drank_alcohol: boolean; smoked_weed: boolean } | null>(null);
+    const [editLog, setEditLog] = useState<{ worked_out: boolean; drank_alcohol: boolean; smoked_weed: boolean; ate_junk_food: boolean } | null>(null);
     const [loading, setLoading] = useState(true);
     const [saving, setSaving] = useState(false);
 
@@ -50,6 +50,7 @@ export default function HistoryPage() {
             worked_out: log?.worked_out || false,
             drank_alcohol: log?.drank_alcohol || false,
             smoked_weed: log?.smoked_weed || false,
+            ate_junk_food: log?.ate_junk_food || false,
         });
     };
 
@@ -68,6 +69,7 @@ export default function HistoryPage() {
                 worked_out: editLog.worked_out,
                 drank_alcohol: editLog.drank_alcohol,
                 smoked_weed: editLog.smoked_weed,
+                ate_junk_food: editLog.ate_junk_food,
                 updated_at: new Date().toISOString(),
             }, {
                 onConflict: 'user_id,date'
@@ -94,7 +96,7 @@ export default function HistoryPage() {
         return logs.find(log => log.date === dateStr);
     };
 
-    const netPoints = editLog ? (editLog.worked_out ? 1 : 0) + (editLog.drank_alcohol ? -1 : 0) + (editLog.smoked_weed ? -1 : 0) : 0;
+    const netPoints = editLog ? (editLog.worked_out ? 1 : 0) + (editLog.drank_alcohol ? -1 : 0) + (editLog.smoked_weed ? -1 : 0) + (editLog.ate_junk_food ? -1 : 0) : 0;
 
     return (
         <div className="min-h-screen p-4 md:p-8">
@@ -165,6 +167,11 @@ export default function HistoryPage() {
                                                     <Leaf className="w-3 h-3 text-yellow-500" />
                                                 </div>
                                             )}
+                                            {log?.ate_junk_food && (
+                                                <div className="w-5 h-5 bg-purple-500/20 rounded flex items-center justify-center" title="Ate Junk Food">
+                                                    <Cookie className="w-3 h-3 text-purple-400" />
+                                                </div>
+                                            )}
                                         </div>
                                         {log && (
                                             <div className={`text-sm font-semibold mt-2 ${log.net_points > 0 ? 'text-green-400' :
@@ -191,7 +198,7 @@ export default function HistoryPage() {
                             Edit {format(new Date(selectedDate), 'MMMM d, yyyy')}
                         </h3>
 
-                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
                             {/* Workout Toggle */}
                             <button
                                 onClick={() => setEditLog({ ...editLog, worked_out: !editLog.worked_out })}
@@ -247,6 +254,26 @@ export default function HistoryPage() {
                                     <Leaf className="w-6 h-6" />
                                     <div>
                                         <div className="font-semibold">Weed</div>
+                                        <div className="text-xs opacity-90">-1 point</div>
+                                    </div>
+                                </div>
+                            </button>
+
+                            {/* Junk Food Toggle */}
+                            <button
+                                onClick={() => setEditLog({ ...editLog, ate_junk_food: !editLog.ate_junk_food })}
+                                className={`
+                                    rounded-xl p-4 transition-all
+                                    ${editLog.ate_junk_food
+                                        ? 'bg-gradient-to-br from-purple-500 to-pink-600'
+                                        : 'glass hover:glass-strong'
+                                    }
+                                `}
+                            >
+                                <div className="flex flex-col items-center gap-2 text-center">
+                                    <Cookie className="w-6 h-6" />
+                                    <div>
+                                        <div className="font-semibold">Junk Food</div>
                                         <div className="text-xs opacity-90">-1 point</div>
                                     </div>
                                 </div>

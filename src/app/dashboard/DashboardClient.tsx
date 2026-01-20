@@ -27,6 +27,8 @@ import {
 } from '@/lib/calculations';
 import { motion } from 'framer-motion';
 import InstallPrompt from '@/components/InstallPrompt';
+import NotificationPrompt from '@/components/NotificationPrompt';
+import { hasShownNotificationPrompt, hasNotificationPermission, showNotification } from '@/lib/notifications';
 
 interface DashboardClientProps {
     user: User;
@@ -46,6 +48,7 @@ export default function DashboardClient({
     const [logs, setLogs] = useState<DailyLog[]>(initialLogs);
     const [stats, setStats] = useState<UserStats | null>(null);
     const [showInstallPrompt, setShowInstallPrompt] = useState(false);
+    const [showNotificationPrompt, setShowNotificationPrompt] = useState(false);
 
     // Calculate stats whenever logs change
     useEffect(() => {
@@ -104,6 +107,77 @@ export default function DashboardClient({
             }
         });
     };
+
+    // Show notification prompt on first visit (if in a group)
+    useEffect(() => {
+        if (groups.length > 0 && !hasShownNotificationPrompt() && !hasNotificationPermission()) {
+            // Show prompt after 3 seconds
+            const timer = setTimeout(() => {
+                setShowNotificationPrompt(true);
+            }, 3000);
+            return () => clearTimeout(timer);
+        }
+    }, [groups]);
+
+    // Subscribe to realtime updates for group workout notifications
+    useEffect(() => {
+        if (groups.length === 0 || !hasNotificationPermission()) return;
+
+        const groupIds = groups.map(g => g.id);
+
+        // Subscribe to daily_logs changes
+        const channel = supabase
+            .channel('workout-notifications')
+            .on(
+                'postgres_changes',
+                {
+                    event: '*',
+                    schema: 'public',
+                    table: 'daily_logs',
+                    filter: `worked_out=eq.true`,
+                },
+                async (payload) => {
+                    const newLog = payload.new as DailyLog;
+
+                    // Don't notify for own workouts
+                    if (newLog.user_id === user.id) return;
+
+                    // For UPDATE events, ensure we only notify if worked_out changed to true
+                    if (payload.eventType === 'UPDATE') {
+                        const oldLog = payload.old as any;
+                        // If it was already true in the old record, skip
+                        // Note: Requires REPLICA IDENTITY FULL on daily_logs table
+                        if (oldLog && oldLog.worked_out === true) return;
+                    }
+
+                    // Check if this user is in any of our groups
+                    const { data: memberships } = await supabase
+                        .from('group_memberships')
+                        .select('group_id, users!inner(username)')
+                        .eq('user_id', newLog.user_id);
+
+                    if (!memberships || memberships.length === 0) return;
+
+                    // Check if we share a group
+                    const sharedGroup = memberships.find((m: any) =>
+                        groupIds.includes(m.group_id)
+                    );
+
+                    if (sharedGroup) {
+                        const username = (sharedGroup as any).users.username;
+                        showNotification(`${username} just logged a workout! 💪`, {
+                            body: 'Keep the momentum going!',
+                            tag: 'workout-notification',
+                        });
+                    }
+                }
+            )
+            .subscribe();
+
+        return () => {
+            supabase.removeChannel(channel);
+        };
+    }, [groups, user.id]);
 
     const handleSignOut = async () => {
         await supabase.auth.signOut();
@@ -245,6 +319,11 @@ export default function DashboardClient({
             <InstallPrompt
                 isOpen={showInstallPrompt}
                 onClose={() => setShowInstallPrompt(false)}
+            />
+            {/* Notification Prompt */}
+            <NotificationPrompt
+                isOpen={showNotificationPrompt}
+                onClose={() => setShowNotificationPrompt(false)}
             />
         </div>
     );

@@ -10,10 +10,36 @@ export default function AuthForm() {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [username, setUsername] = useState('');
+    const [emailSent, setEmailSent] = useState(false);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
+    const [usernameError, setUsernameError] = useState<string | null>(null);
+    const [checkingUsername, setCheckingUsername] = useState(false);
 
     const supabase = createClient();
+
+    const checkUsername = async (value: string) => {
+        if (!value || value.length < 3) return;
+
+        setCheckingUsername(true);
+        setUsernameError(null);
+
+        try {
+            const { data, error } = await supabase
+                .from('users')
+                .select('username')
+                .eq('username', value)
+                .maybeSingle();
+
+            if (data) {
+                setUsernameError('Username is already taken');
+            }
+        } catch (err) {
+            console.error('Error checking username:', err);
+        } finally {
+            setCheckingUsername(false);
+        }
+    };
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -30,13 +56,15 @@ export default function AuthForm() {
                         data: {
                             username: username || email.split('@')[0],
                         },
+                        emailRedirectTo: `${window.location.origin}/auth/callback`,
                     },
                 });
 
                 if (signUpError) throw signUpError;
 
-                if (data.user) {
-                    // Profile is created automatically by DB trigger
+                if (data.user && !data.session) {
+                    setEmailSent(true);
+                    return;
                 }
             } else {
                 // Sign in
@@ -55,6 +83,40 @@ export default function AuthForm() {
             setLoading(false);
         }
     };
+
+    if (emailSent) {
+        return (
+            <div className="min-h-screen flex items-center justify-center p-4">
+                <motion.div
+                    initial={{ opacity: 0, scale: 0.95 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    className="w-full max-w-md"
+                >
+                    <div className="glass-strong rounded-2xl p-8 text-center">
+                        <div className="w-16 h-16 bg-primary/20 rounded-full flex items-center justify-center mx-auto mb-6">
+                            <Mail className="w-8 h-8 text-primary" />
+                        </div>
+                        <h2 className="text-2xl font-bold mb-4">Check your email</h2>
+                        <p className="text-muted-foreground mb-2">
+                            We&apos;ve sent a confirmation link to <span className="font-semibold text-foreground">{email}</span>.
+                        </p>
+                        <p className="text-sm text-muted-foreground mb-6">
+                            Please click the link in your email to confirm your account, then return here to sign in.
+                        </p>
+                        <button
+                            onClick={() => {
+                                setIsSignUp(false);
+                                setEmailSent(false);
+                            }}
+                            className="text-primary hover:underline"
+                        >
+                            Back to Sign In
+                        </button>
+                    </div>
+                </motion.div>
+            </div>
+        );
+    }
 
     return (
         <div className="min-h-screen flex items-center justify-center p-4">
@@ -75,7 +137,10 @@ export default function AuthForm() {
                 <div className="glass-strong rounded-2xl p-8">
                     <div className="flex gap-2 mb-6 p-1 glass rounded-xl">
                         <button
-                            onClick={() => setIsSignUp(false)}
+                            onClick={() => {
+                                setIsSignUp(false);
+                                setError(null);
+                            }}
                             className={`
                 flex-1 px-4 py-2 rounded-lg font-medium text-sm
                 transition-all duration-200
@@ -88,7 +153,10 @@ export default function AuthForm() {
                             Sign In
                         </button>
                         <button
-                            onClick={() => setIsSignUp(true)}
+                            onClick={() => {
+                                setIsSignUp(true);
+                                setError(null);
+                            }}
                             className={`
                 flex-1 px-4 py-2 rounded-lg font-medium text-sm
                 transition-all duration-200
@@ -113,11 +181,24 @@ export default function AuthForm() {
                                     <input
                                         type="text"
                                         value={username}
-                                        onChange={(e) => setUsername(e.target.value)}
+                                        onChange={(e) => {
+                                            setUsername(e.target.value);
+                                            setUsernameError(null);
+                                        }}
+                                        onBlur={(e) => checkUsername(e.target.value)}
                                         placeholder="johndoe"
-                                        className="w-full pl-10 pr-4 py-3 bg-input border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary transition-all"
+                                        className={`w-full pl-10 pr-4 py-3 bg-input border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary transition-all ${usernameError ? 'border-destructive focus:ring-destructive' : 'border-border'
+                                            }`}
                                     />
+                                    {checkingUsername && (
+                                        <div className="absolute right-3 top-1/2 -translate-y-1/2">
+                                            <div className="animate-spin h-4 w-4 border-2 border-primary border-t-transparent rounded-full"></div>
+                                        </div>
+                                    )}
                                 </div>
+                                {usernameError && (
+                                    <p className="text-destructive text-xs mt-1 ml-1">{usernameError}</p>
+                                )}
                             </div>
                         )}
 

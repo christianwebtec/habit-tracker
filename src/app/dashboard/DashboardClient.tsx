@@ -15,7 +15,8 @@ import {
     Dumbbell,
     LogOut,
     Users,
-    Plus
+    Plus,
+    Download
 } from 'lucide-react';
 import {
     calculateTotalPoints,
@@ -25,6 +26,7 @@ import {
     getTodayLog,
 } from '@/lib/calculations';
 import { motion } from 'framer-motion';
+import InstallPrompt from '@/components/InstallPrompt';
 
 interface DashboardClientProps {
     user: User;
@@ -43,6 +45,7 @@ export default function DashboardClient({
     const supabase = createClient();
     const [logs, setLogs] = useState<DailyLog[]>(initialLogs);
     const [stats, setStats] = useState<UserStats | null>(null);
+    const [showInstallPrompt, setShowInstallPrompt] = useState(false);
 
     // Calculate stats whenever logs change
     useEffect(() => {
@@ -120,6 +123,14 @@ export default function DashboardClient({
                         <p className="text-muted-foreground">Keep the momentum going!</p>
                     </div>
                     <div className="flex gap-2">
+                        <button
+                            onClick={() => setShowInstallPrompt(true)}
+                            className="glass-strong px-4 py-3 rounded-lg hover-lift transition-smooth flex items-center gap-2"
+                            title="Install App"
+                        >
+                            <Download className="w-5 h-5" />
+                            <span className="hidden sm:inline">Install</span>
+                        </button>
                         <button
                             onClick={() => router.push('/history')}
                             className="glass-strong px-4 py-3 rounded-lg hover-lift transition-smooth flex items-center gap-2"
@@ -228,7 +239,12 @@ export default function DashboardClient({
                         </div>
                     )}
                 </div>
+                </div>
             </div>
-        </div>
+            <InstallPrompt 
+                isOpen={showInstallPrompt} 
+                onClose={() => setShowInstallPrompt(false)} 
+            />
+        </div >
     );
 }

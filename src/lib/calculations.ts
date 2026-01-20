@@ -40,6 +40,18 @@ export function calculateWorkoutStreak(logs: DailyLog[]): number {
     let expectedDate = new Date();
     expectedDate.setHours(0, 0, 0, 0);
 
+    // If the most recent log is from yesterday, start counting from yesterday
+    // This allows the streak to continue even if the user hasn't logged today yet
+    if (sortedLogs.length > 0) {
+        const lastLogDate = parseISO(sortedLogs[0].date);
+        lastLogDate.setHours(0, 0, 0, 0);
+
+        const yesterday = subDays(expectedDate, 1);
+        if (lastLogDate.getTime() === yesterday.getTime()) {
+            expectedDate = yesterday;
+        }
+    }
+
     for (const log of sortedLogs) {
         const logDate = parseISO(log.date);
         logDate.setHours(0, 0, 0, 0);
@@ -56,6 +68,7 @@ export function calculateWorkoutStreak(logs: DailyLog[]): number {
             // Gap in logs, streak broken
             break;
         }
+        // If logDate is after expectedDate (future), ignore it (shouldn't happen with sortedLogs)
     }
 
     return streak;
@@ -72,6 +85,17 @@ export function calculateCleanStreak(logs: DailyLog[]): number {
     let streak = 0;
     let expectedDate = new Date();
     expectedDate.setHours(0, 0, 0, 0);
+
+    // If the most recent log is from yesterday, start counting from yesterday
+    if (sortedLogs.length > 0) {
+        const lastLogDate = parseISO(sortedLogs[0].date);
+        lastLogDate.setHours(0, 0, 0, 0);
+
+        const yesterday = subDays(expectedDate, 1);
+        if (lastLogDate.getTime() === yesterday.getTime()) {
+            expectedDate = yesterday;
+        }
+    }
 
     for (const log of sortedLogs) {
         const logDate = parseISO(log.date);

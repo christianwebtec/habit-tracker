@@ -239,12 +239,11 @@ export default function DashboardClient({
                         </div>
                     )}
                 </div>
-                </div>
             </div>
-            <InstallPrompt 
-                isOpen={showInstallPrompt} 
-                onClose={() => setShowInstallPrompt(false)} 
+            <InstallPrompt
+                isOpen={showInstallPrompt}
+                onClose={() => setShowInstallPrompt(false)}
             />
-        </div >
+        </div>
     );
 }

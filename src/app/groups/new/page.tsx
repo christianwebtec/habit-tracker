@@ -36,10 +36,10 @@ export default function NewGroupPage() {
             const { data: { user } } = await supabase.auth.getUser();
             if (!user) throw new Error('Not authenticated');
 
-            // Check if user profile exists
+            // Check if user profile exists, create if missing
             const { data: profile, error: profileError } = await supabase
                 .from('users')
-                .select('id')
+                .select('id, username')
                 .eq('id', user.id)
                 .maybeSingle();
 
@@ -49,7 +49,20 @@ export default function NewGroupPage() {
             }
 
             if (!profile) {
-                throw new Error('User profile not found. Please refresh the page and try again.');
+                // Auto-create profile if trigger failed
+                console.log('Profile not found, creating...');
+                const username = user.email?.split('@')[0] || 'user';
+                const { error: createError } = await supabase
+                    .from('users')
+                    .insert({
+                        id: user.id,
+                        username: username,
+                    });
+
+                if (createError) {
+                    console.error('Profile creation error:', createError);
+                    throw new Error('Failed to create user profile. Please try again.');
+                }
             }
 
             const code = generateInviteCode();
@@ -100,10 +113,10 @@ export default function NewGroupPage() {
             const { data: { user } } = await supabase.auth.getUser();
             if (!user) throw new Error('Not authenticated');
 
-            // Check if user profile exists
+            // Check if user profile exists, create if missing
             const { data: profile, error: profileError } = await supabase
                 .from('users')
-                .select('id')
+                .select('id, username')
                 .eq('id', user.id)
                 .maybeSingle();
 
@@ -113,7 +126,20 @@ export default function NewGroupPage() {
             }
 
             if (!profile) {
-                throw new Error('User profile not found. Please refresh the page and try again.');
+                // Auto-create profile if trigger failed
+                console.log('Profile not found, creating...');
+                const username = user.email?.split('@')[0] || 'user';
+                const { error: createError } = await supabase
+                    .from('users')
+                    .insert({
+                        id: user.id,
+                        username: username,
+                    });
+
+                if (createError) {
+                    console.error('Profile creation error:', createError);
+                    throw new Error('Failed to create user profile. Please try again.');
+                }
             }
 
             // Find group by invite code
